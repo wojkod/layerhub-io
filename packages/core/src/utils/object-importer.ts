@@ -99,7 +99,7 @@ class ObjectImporter {
     return new Promise(async (resolve, reject) => {
       try {
         const baseOptions = this.getBaseOptions(item, options, inGroup)
-        const { src, cropX, cropY } = item as IStaticImage
+        const { src, cropX, cropY, filters } = item as IStaticImage
 
         const image: any = await loadImageFromURL(src)
 
@@ -117,6 +117,79 @@ class ObjectImporter {
 
         updateObjectBounds(element, options)
         updateObjectShadow(element, item.shadow)
+
+        filters.forEach((f: any)=>{
+          let filter;
+          switch (f.type) {
+            case 'Blur':
+              //@ts-ignore
+              if (f.blur) filter = new fabric.Image.filters.Blur({blur: f.blur});
+              break;
+            case 'Brightness':
+              //@ts-ignore
+              if (f.brightness) filter = new fabric.Image.filters.Brightness({brightness: f.brightness});
+              break;
+            case 'Contrast':
+              //@ts-ignore
+              if (f.contrast) filter = new fabric.Image.filters.Contrast({contrast: f.contrast});
+              break;
+            case 'Saturation':
+              //@ts-ignore
+              if (f.saturation) filter = new fabric.Image.filters.Saturation({saturation: f.saturation});
+              break;
+            case 'Vibrance':
+              //@ts-ignore
+              if (f.vibrance) filter = new fabric.Image.filters.Vibrance({vibrance: f.vibrance});
+              break;
+            case 'HueRotation':
+              //@ts-ignore
+              if (f.rotation) filter = new fabric.Image.filters.HueRotation({rotation: f.rotation});
+              break;
+            case 'Invert':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Invert();
+              break;
+            case 'BlackWhite':
+              //@ts-ignore
+              filter = new fabric.Image.filters.BlackWhite();
+              break;
+            case 'Grayscale':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Grayscale();
+              break;
+            case 'Sepia':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Sepia();
+              break;
+            case 'Polaroid':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Polaroid();
+              break;
+            case 'Brownie':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Brownie();
+              break;
+            case 'Kodachrome':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Kodachrome();
+              break;
+            case 'Technicolor':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Technicolor();
+              break;
+            case 'Vintage':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Vintage();
+              break;
+            default:
+              console.log(`Not Supported: ${f.type}.`);
+          }
+          element?.filters?.push(filter);
+        });
+
+        element.applyFilters();
+
+        //if (filters && filters.length>0) element.applyFilters(filters);
 
         resolve(element)
       } catch (err) {
@@ -322,6 +395,10 @@ class ObjectImporter {
       originY,
       type,
       preview,
+      hasControls,
+      locked,
+      lockMovementX,
+      lockMovementY,
     } = item as Required<ILayer>
     let metadata = item.metadata ? item.metadata : {}
     const { fill } = metadata
@@ -353,6 +430,10 @@ class ObjectImporter {
       strokeDashOffset: item.strokeDashOffset ? item.strokeMiterLimit : 0,
       metadata: metadata,
       preview,
+      hasControls,
+      locked,
+      lockMovementX,
+      lockMovementY,
     }
     return baseOptions
   }
