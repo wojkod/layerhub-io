@@ -81,7 +81,7 @@ class ObjectImporter {
     return new Promise(async (resolve, reject) => {
       try {
         const baseOptions = this.getBaseOptions(item)
-        const { src, cropX, cropY } = item as IStaticImage
+        const { src, cropX, cropY, filters } = item as IStaticImage
 
         const image: any = await loadImageFromURL(src)
         const element = new fabric.StaticImage(image, {
@@ -90,6 +90,77 @@ class ObjectImporter {
           cropY: cropY || 0,
         })
         updateObjectShadow(element, item.shadow)
+
+        filters.forEach((f: any)=>{
+          let filter;
+          switch (f.type) {
+            case 'Blur':
+              //@ts-ignore
+              if (f.blur) filter = new fabric.Image.filters.Blur({blur: f.blur});
+              break;
+            case 'Brightness':
+              //@ts-ignore
+              if (f.brightness) filter = new fabric.Image.filters.Brightness({brightness: f.brightness});
+              break;
+            case 'Contrast':
+              //@ts-ignore
+              if (f.contrast) filter = new fabric.Image.filters.Contrast({contrast: f.contrast});
+              break;
+            case 'Saturation':
+              //@ts-ignore
+              if (f.saturation) filter = new fabric.Image.filters.Saturation({saturation: f.saturation});
+              break;
+            case 'Vibrance':
+              //@ts-ignore
+              if (f.vibrance) filter = new fabric.Image.filters.Vibrance({vibrance: f.vibrance});
+              break;
+            case 'HueRotation':
+              //@ts-ignore
+              if (f.rotation) filter = new fabric.Image.filters.HueRotation({rotation: f.rotation});
+              break;
+            case 'Invert':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Invert();
+              break;
+            case 'BlackWhite':
+              //@ts-ignore
+              filter = new fabric.Image.filters.BlackWhite();
+              break;
+            case 'Grayscale':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Grayscale();
+              break;
+            case 'Sepia':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Sepia();
+              break;
+            case 'Polaroid':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Polaroid();
+              break;
+            case 'Brownie':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Brownie();
+              break;
+            case 'Kodachrome':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Kodachrome();
+              break;
+            case 'Technicolor':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Technicolor();
+              break;
+            case 'Vintage':
+              //@ts-ignore
+              filter = new fabric.Image.filters.Vintage();
+              break;
+            default:
+              console.log(`Not Supported: ${f.type}.`);
+          }
+          element?.filters?.push(filter);
+        });
+
+        element.applyFilters();
 
         resolve(element)
       } catch (err) {
